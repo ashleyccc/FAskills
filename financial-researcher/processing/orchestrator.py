@@ -50,6 +50,12 @@ from .metrics_calculator import (
     aggregate_flags,
     calculate_quality_score,
 )
+from .credit_metrics import (
+    calculate_icr,
+    calculate_leverage,
+    calculate_refinancing_risk,
+    run_recession_stress_test,
+)
 
 
 @dataclass
@@ -204,6 +210,38 @@ class AnalysisResult:
             # Overall Quality
             lines.append(f"## Overall Quality Score: {ca.overall_quality_score}/100")
 
+            # Credit Risk Section
+            lines.append("")
+            lines.append("## Credit Risk Analysis (CRO View)")
+            
+            if ca.interest_coverage:
+                lines.append(f"### Interest Coverage Ratio: {ca.interest_coverage.value}x")
+                lines.append(f"Interpretation: {ca.interest_coverage.interpretation}")
+                if ca.interest_coverage.flags:
+                    lines.append(f"Flags: {', '.join(ca.interest_coverage.flags)}")
+                lines.append("")
+
+            if ca.leverage_ratio:
+                lines.append(f"### Leverage (Net Debt/EBITDA): {ca.leverage_ratio.value}x")
+                lines.append(f"Interpretation: {ca.leverage_ratio.interpretation}")
+                if ca.leverage_ratio.flags:
+                    lines.append(f"Flags: {', '.join(ca.leverage_ratio.flags)}")
+                lines.append("")
+
+            if ca.refinancing_risk:
+                lines.append(f"### Refinancing Risk Indicator: {ca.refinancing_risk.value}")
+                lines.append(f"Interpretation: {ca.refinancing_risk.interpretation}")
+                if ca.refinancing_risk.flags:
+                    lines.append(f"Flags: {', '.join(ca.refinancing_risk.flags)}")
+                lines.append("")
+
+            if ca.stress_test_result:
+                st = ca.stress_test_result
+                lines.append(f"### Stress Test: {st.scenario_name}")
+                lines.append(f"Stressed ICR: {st.stressed_icr}x (Change: {st.icr_change}x)")
+                lines.append(f"Survival Check: {'PASSED' if st.survives else 'FAILED'}")
+                lines.append("")
+
         return "\n".join(lines)
 
 
@@ -323,6 +361,32 @@ def calculate_all_metrics(company: CompanyData, wacc: float = 0.10) -> Comprehen
             cash=current.cash,
             ppe_net=current.ppe_net,
             working_capital=current.working_capital,
+        )
+    except Exception:
+        pass
+
+    # === CREDIT RISK METRICS ===
+    try:
+        analysis.interest_coverage = calculate_icr(
+            ebit=current.ebit,
+            interest_expense=current.interest_expense
+        )
+        
+        analysis.leverage_ratio = calculate_leverage(
+            net_debt=current.total_debt - current.cash,
+            ebitda=current.ebitda
+        )
+        
+        analysis.refinancing_risk = calculate_refinancing_risk(
+            short_term_debt=current.short_term_debt,
+            cash_and_equivalents=current.cash,
+            operating_cash_flow=current.operating_cash_flow
+        )
+        
+        analysis.stress_test_result = run_recession_stress_test(
+            ebit=current.ebit,
+            interest_expense=current.interest_expense,
+            revenue=current.revenue
         )
     except Exception:
         pass
@@ -591,6 +655,12 @@ def format_for_expert(result: AnalysisResult, expert_type: str) -> str:
             f"- Sloan Accrual Ratio: {result.comprehensive_analysis.sloan_accrual.value if result.comprehensive_analysis and result.comprehensive_analysis.sloan_accrual else 'N/A'}%",
             f"- All Red Flags: {len(result.comprehensive_analysis.red_flags) if result.comprehensive_analysis else 0}",
         ],
+        "cro": [
+             "\n## Chief Risk Officer Highlights",
+             f"- Stressed ICR (Simulated): {result.comprehensive_analysis.stress_test_result.stressed_icr if result.comprehensive_analysis and result.comprehensive_analysis.stress_test_result else 'N/A'}",
+             f"- Refinancing Risk: {result.comprehensive_analysis.refinancing_risk.interpretation if result.comprehensive_analysis and result.comprehensive_analysis.refinancing_risk else 'N/A'}",
+             f"- Leverage Status: {result.comprehensive_analysis.leverage_ratio.interpretation if result.comprehensive_analysis and result.comprehensive_analysis.leverage_ratio else 'N/A'}",
+        ]
     }
 
     emphasis = expert_emphasis.get(expert_type.lower(), [])

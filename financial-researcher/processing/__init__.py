@@ -127,6 +127,15 @@ from .metrics_calculator import (
     calculate_quality_score,
 )
 
+from .credit_metrics import (
+    calculate_icr,
+    calculate_leverage,
+    calculate_refinancing_risk,
+    run_recession_stress_test,
+    CreditMetricResult,
+    StressTestResult,
+)
+
 # Legacy exports from financial_metrics.py (for backwards compatibility)
 from .financial_metrics import (
     PiotroskiResult,
@@ -218,6 +227,14 @@ __all__ = [
     # Summary
     "aggregate_flags",
     "calculate_quality_score",
+
+    # Credit Metrics
+    "calculate_icr",
+    "calculate_leverage",
+    "calculate_refinancing_risk",
+    "run_recession_stress_test",
+    "CreditMetricResult",
+    "StressTestResult",
 
     # Legacy (backwards compatibility)
     "PiotroskiResult",

@@ -25,7 +25,7 @@ This skill operates in two modes and follows the DRIVER methodology:
 │  USER: /financial-researcher {TICKER}                       │
 ├─────────────────────────────────────────────────────────────┤
 │  1. MODE SELECTION                                          │
-│     └─> Quick lookup OR Full 7-guru analysis                │
+│     └─> Quick lookup OR Full 8-guru analysis                │
 ├─────────────────────────────────────────────────────────────┤
 │  2. [DISCOVER] - Data Fetching                              │
 │     ├─> Calculate data union based on mode                  │
@@ -124,9 +124,10 @@ Each expert needs specific data. Fetch the UNION once, then route SUBSETS to eac
 │ news_finance    │ ✓  │    │ ✓  │ ✓  │ ✓  │    │ ✓  │
 │ news_recent     │ ✓  │ ✓  │ ✓  │ ✓  │ ✓  │ ✓  │ ✓  │
 │ news_risks      │    │    │    │    │    │ ✓  │ ✓  │
-└─────────────────┴────┴────┴────┴────┴────┴────┴────┘
+│ news_risks      │    │    │    │    │    │ ✓  │ ✓  │ ✓  │
+└─────────────────┴────┴────┴────┴────┴────┴────┴────┴────┘
 
-Legend: WB=Buffett, BG=Graham, PL=Lynch, CW=Wood, GS=Soros, RD=Dalio, MB=Burry
+Legend: WB=Buffett, BG=Graham, PL=Lynch, CW=Wood, GS=Soros, RD=Dalio, MB=Burry, CR=Risk Officer
 ```
 
 ### 2.2 Data Windows (Extended)
@@ -584,20 +585,38 @@ const dataSubsets = {
     insider_trades: insider_trades,  // Critical for Burry
     holdings_json: scion_holdings.filter(h => h.ticker === ticker)
   }
+    insider_trades: insider_trades,  // Critical for Burry
+    holdings_json: scion_holdings.filter(h => h.ticker === ticker)
+  },
+
+  chief_risk_officer: {
+    // Pre-calculated metrics (primary - downside focus)
+    interest_coverage: calculated.interest_coverage,
+    leverage: calculated.leverage,
+    refi_risk: calculated.refi_risk,
+    stress_test: calculated.stress_test,
+    altman: calculated.altman,
+    // Context data
+    current_price: latest_price,
+    market_cap: company_facts.market_cap,
+    filings_content: sec_filings,
+    news_items: [...news_risks, ...news_finance]
+  }
 };
 
 // Expert-to-Metric Mapping Summary:
-// ┌─────────────┬───────────┬─────────┬──────────┬────────┬──────┬────────┬───────┬────────┐
-// │ Expert      │ Piotroski │ Altman  │ Beneish  │ Owner  │ ROIC │ Graham │ Val.  │ Growth │
-// ├─────────────┼───────────┼─────────┼──────────┼────────┼──────┼────────┼───────┼────────┤
-// │ Buffett     │     ✓     │         │          │   ✓    │  ✓   │        │   ✓   │   ✓    │
-// │ Graham      │     ✓     │    ✓    │          │        │      │   ✓    │   ✓   │   ✓    │
-// │ Lynch       │     ✓     │         │          │        │      │        │   ✓   │   ✓    │
-// │ Wood        │           │         │          │        │      │        │   ✓   │   ✓    │
-// │ Soros       │           │         │          │        │      │        │   ✓   │        │
-// │ Dalio       │     ✓     │    ✓    │          │        │  ✓   │        │   ✓   │   ✓    │
-// │ Burry       │     ✓     │    ✓    │    ✓     │   ✓    │      │        │   ✓   │   ✓    │
-// └─────────────┴───────────┴─────────┴──────────┴────────┴──────┴────────┴───────┴────────┘
+// ┌─────────────┬───────────┬─────────┬──────────┬────────┬──────┬────────┬───────┬────────┬──────────┐
+// │ Expert      │ Piotroski │ Altman  │ Beneish  │ Owner  │ ROIC │ Graham │ Val.  │ Growth │ Credit   │
+// ├─────────────┼───────────┼─────────┼──────────┼────────┼──────┼────────┼───────┼────────┼──────────┤
+// │ Buffett     │     ✓     │         │          │   ✓    │  ✓   │        │   ✓   │   ✓    │          │
+// │ Graham      │     ✓     │    ✓    │          │        │      │   ✓    │   ✓   │   ✓    │          │
+// │ Lynch       │     ✓     │         │          │        │      │        │   ✓   │   ✓    │          │
+// │ Wood        │           │         │          │        │      │        │   ✓   │   ✓    │          │
+// │ Soros       │           │         │          │        │      │        │   ✓   │        │          │
+// │ Dalio       │     ✓     │    ✓    │          │        │  ✓   │        │   ✓   │   ✓    │          │
+// │ Burry       │     ✓     │    ✓    │    ✓     │   ✓    │      │        │   ✓   │   ✓    │          │
+// │ Risk Officer│     ✓     │    ✓    │          │        │      │        │       │        │    ✓     │
+// └─────────────┴───────────┴─────────┴──────────┴────────┴──────┴────────┴───────┴────────┴──────────┘
 ```
 
 ---
@@ -606,7 +625,7 @@ const dataSubsets = {
 
 ### 3.1 Dispatch Pattern
 
-**CRITICAL:** Spawn ALL 7 experts in a SINGLE message with multiple Task tool calls for true parallelism.
+**CRITICAL:** Spawn ALL 8 experts in a SINGLE message with multiple Task tool calls for true parallelism.
 
 ```
 Use Task tool with:
@@ -688,6 +707,12 @@ Task({
   subagent_type: "general-purpose",
   description: "Michael Burry analysis of {TICKER}",
   prompt: constructedBurryPrompt
+})
+
+Task({
+  subagent_type: "general-purpose",
+  description: "Chief Risk Officer analysis of {TICKER}",
+  prompt: constructedRiskOfficerPrompt
 })
 ```
 

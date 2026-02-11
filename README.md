@@ -8,11 +8,13 @@ Claude Code plugins for financial analysis.
 
 ### financial-researcher (v2.0.0)
 
-7 legendary investors analyze any stock. One command.
+### financial-researcher (v2.1.0)
+
+8 legendary investors analyze any stock. One command.
 
 ```
 /financial-researcher AAPL          # Prompts for mode
-/financial-researcher NVDA --full   # Full 7-guru analysis
+/financial-researcher NVDA --full   # Full 8-guru analysis (includes CRO)
 /financial-researcher TSLA --quick  # Quick metrics only
 ```
 
@@ -27,6 +29,7 @@ Claude Code plugins for financial analysis.
 | George Soros | Reflexivity, macro regime |
 | Ray Dalio | Cycles, debt analysis, stress tests |
 | Michael Burry | Forensics, bear case, contrarian signals |
+| **Chief Risk Officer** | **Solvency, liquidity, Basel III stress tests** |
 
 #### Features
 
@@ -34,10 +37,11 @@ Claude Code plugins for financial analysis.
   - Piotroski F-Score (0-9 financial strength)
   - Altman Z-Score (bankruptcy prediction)
   - Beneish M-Score (earnings manipulation detection)
+  - **Credit Metrics**: ICR Stress Test, Refinancing Risk, Leverage Ratios
   - Owner Earnings, EVA, DuPont analysis
 
 - **Output**
-  - Signal consensus across all 7 analysts
+  - Signal consensus across all 8 analysts
   - Individual price targets and confidence levels
   - Risk matrix and key concerns
   - Full markdown report + JSON saved to `reports/`

@@ -1132,6 +1132,12 @@ class ComprehensiveAnalysis:
     ohlson_o: Optional[MetricResult] = None
     beneish_m: Optional[MetricResult] = None
     magic_formula: Optional[MetricResult] = None
+    
+    # Credit Risk Metrics
+    interest_coverage: Optional[MetricResult] = None
+    leverage_ratio: Optional[MetricResult] = None
+    refinancing_risk: Optional[MetricResult] = None
+    stress_test_result: Any = None # StressTestResult from credit_metrics
 
     # Quality Metrics
     sloan_accrual: Optional[MetricResult] = None
