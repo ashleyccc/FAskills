@@ -13,6 +13,9 @@ def run_dcf(fcf, shares_outstanding, current_price, discount_rate=0.10, short_te
     # Discount projected FCFs
     discounted_fcfs = [cf / ((1 + discount_rate)**i) for i, cf in enumerate(projected_fcfs, 1)]
     
+    if discount_rate <= terminal_growth_rate:
+        return None
+        
     # Terminal Value
     terminal_value = (projected_fcfs[-1] * (1 + terminal_growth_rate)) / (discount_rate - terminal_growth_rate)
     discounted_tv = terminal_value / ((1 + discount_rate)**years)
