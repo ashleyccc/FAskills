@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "financialdatasets": {
+      "type": "url",
+      "url": "https://mcp.financialdatasets.ai/api",
+      "headers": {
+        "X-API-KEY": "${FINANCIAL_DATASETS_API_KEY}"
+      }
+    },
+    "tavily": {
+      "type": "url",
+      "url": "https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}"
+    }
+  }
+}

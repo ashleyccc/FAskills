@@ -1,0 +1,26 @@
+{
+  "name": "financial-researcher",
+  "description": "Professional-grade autonomous financial analyst leveraging 7 legendary investor perspectives (Buffett, Graham, Lynch, Wood, Soros, Dalio, Burry). Guided by DRIVER methodology.",
+  "version": "2.0.0",
+  "author": {
+    "name": "FAskills"
+  },
+  "license": "MIT",
+  "skills": [
+    {
+      "name": "financial-researcher",
+      "description": "Analyze any stock with 7 legendary investor perspectives",
+      "command": "/financial-researcher",
+      "file": "../SKILL.md"
+    }
+  ],
+  "keywords": [
+    "finance",
+    "financial-analysis",
+    "stock-analysis",
+    "investing",
+    "value-investing",
+    "warren-buffett",
+    "fundamental-analysis"
+  ]
+}

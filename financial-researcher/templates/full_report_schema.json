@@ -1,0 +1,256 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Financial Researcher Full Report",
+  "description": "Complete JSON output schema for the financial-researcher skill",
+  "type": "object",
+  "required": ["meta", "data_sources", "experts", "consolidation"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Report metadata",
+      "required": ["ticker", "company_name", "generated_at", "mode", "skill_version"],
+      "properties": {
+        "ticker": {
+          "type": "string",
+          "description": "Stock ticker symbol"
+        },
+        "company_name": {
+          "type": "string",
+          "description": "Full company name"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of report generation"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["quick", "full"],
+          "description": "Analysis mode used"
+        },
+        "skill_version": {
+          "type": "string",
+          "description": "Version of the financial-researcher skill"
+        },
+        "current_price": {
+          "type": "number",
+          "description": "Stock price at time of analysis"
+        },
+        "market_cap": {
+          "type": "number",
+          "description": "Market capitalization in dollars"
+        }
+      }
+    },
+    "data_sources": {
+      "type": "object",
+      "description": "Information about data sources used",
+      "properties": {
+        "financial_data": {
+          "type": "object",
+          "properties": {
+            "source": { "type": "string" },
+            "retrieved_at": { "type": "string", "format": "date-time" }
+          }
+        },
+        "news": {
+          "type": "object",
+          "properties": {
+            "source": { "type": "string" },
+            "max_age_days": { "type": "integer" },
+            "article_count": { "type": "integer" }
+          }
+        },
+        "sec_filings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "period": { "type": "string" },
+              "items_extracted": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "thirteenf_holdings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "filer": { "type": "string" },
+              "as_of_date": { "type": "string", "format": "date" },
+              "has_position": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "experts": {
+      "type": "object",
+      "description": "Individual expert analyses - keys are guru IDs",
+      "properties": {
+        "warren_buffett": { "$ref": "#/definitions/expert_output" },
+        "ben_graham": { "$ref": "#/definitions/expert_output" },
+        "peter_lynch": { "$ref": "#/definitions/expert_output" },
+        "cathie_wood": { "$ref": "#/definitions/expert_output" },
+        "george_soros": { "$ref": "#/definitions/expert_output" },
+        "ray_dalio": { "$ref": "#/definitions/expert_output" },
+        "michael_burry": { "$ref": "#/definitions/expert_output" }
+      }
+    },
+    "consolidation": {
+      "type": "object",
+      "description": "Consolidated analysis across all experts",
+      "required": ["signal_tally", "confidence_weighted_signal", "agreement_themes", "divergence_themes", "all_risks"],
+      "properties": {
+        "signal_tally": {
+          "type": "object",
+          "properties": {
+            "bullish": { "type": "integer" },
+            "neutral": { "type": "integer" },
+            "bearish": { "type": "integer" }
+          }
+        },
+        "confidence_weighted_signal": {
+          "type": "string",
+          "enum": ["bullish", "neutral", "bearish"],
+          "description": "Signal weighted by confidence levels"
+        },
+        "confidence_weighted_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Confidence-weighted score (0-100)"
+        },
+        "agreement_themes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "theme": { "type": "string" },
+              "experts_agreeing": { "type": "array", "items": { "type": "string" } },
+              "count": { "type": "integer" }
+            }
+          },
+          "description": "Themes where multiple experts agree"
+        },
+        "divergence_themes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "theme": { "type": "string" },
+              "bull_view": { "type": "string" },
+              "bear_view": { "type": "string" },
+              "experts_split": {
+                "type": "object",
+                "properties": {
+                  "bullish_on_theme": { "type": "array", "items": { "type": "string" } },
+                  "bearish_on_theme": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          },
+          "description": "Themes where experts diverge"
+        },
+        "all_risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "risk": { "type": "string" },
+              "flagged_by": { "type": "array", "items": { "type": "string" } },
+              "severity": { "type": "string", "enum": ["high", "medium", "low"] }
+            }
+          },
+          "description": "Union of all risks flagged, deduplicated"
+        },
+        "bull_case_summary": {
+          "type": "string",
+          "description": "Synthesized bull case from bullish experts"
+        },
+        "bear_case_summary": {
+          "type": "string",
+          "description": "Synthesized bear case from bearish experts"
+        },
+        "price_targets": {
+          "type": "object",
+          "properties": {
+            "consensus_buy_below": { "type": "number" },
+            "consensus_target": { "type": "number" },
+            "consensus_sell_above": { "type": "number" },
+            "range_low": { "type": "number" },
+            "range_high": { "type": "number" }
+          }
+        },
+        "agreement_matrix": {
+          "type": "object",
+          "description": "Matrix of which experts flagged which themes",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": ["positive", "negative", "not_mentioned"]
+            }
+          }
+        }
+      }
+    },
+    "quick_metrics": {
+      "type": "object",
+      "description": "Key metrics for quick mode (also included in full mode)",
+      "properties": {
+        "pe_ratio": { "type": "number" },
+        "pb_ratio": { "type": "number" },
+        "ps_ratio": { "type": "number" },
+        "peg_ratio": { "type": "number" },
+        "roe": { "type": "number" },
+        "roa": { "type": "number" },
+        "debt_to_equity": { "type": "number" },
+        "current_ratio": { "type": "number" },
+        "revenue_growth": { "type": "number" },
+        "earnings_growth": { "type": "number" },
+        "profit_margin": { "type": "number" },
+        "operating_margin": { "type": "number" },
+        "free_cash_flow": { "type": "number" },
+        "dividend_yield": { "type": "number" }
+      }
+    }
+  },
+  "definitions": {
+    "expert_output": {
+      "type": "object",
+      "description": "Output from a single expert analysis",
+      "required": ["expert", "signal", "confidence", "thesis", "forward_outlook", "analysis", "key_risks"],
+      "properties": {
+        "expert": { "type": "string" },
+        "signal": { "type": "string", "enum": ["bullish", "neutral", "bearish"] },
+        "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "thesis": { "type": "string" },
+        "forward_outlook": {
+          "type": "object",
+          "properties": {
+            "prediction": { "type": "string" },
+            "timeline": { "type": "string" },
+            "price_target": { "type": "string" },
+            "catalyst": { "type": "string" }
+          }
+        },
+        "analysis": { "type": "object" },
+        "key_risks": { "type": "array", "items": { "type": "string" } },
+        "what_changes_my_mind": { "type": "array", "items": { "type": "string" } },
+        "holdings_context": {
+          "type": "object",
+          "properties": {
+            "current_position": { "type": "string" },
+            "recent_changes": { "type": "string" },
+            "signal_from_actions": { "type": "string" }
+          }
+        },
+        "would_buy_at": { "type": "string" },
+        "would_sell_at": { "type": "string" },
+        "private_assessment": { "type": "string" }
+      }
+    }
+  }
+}
