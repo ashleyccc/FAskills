@@ -12,6 +12,8 @@ st.set_page_config(page_title="DRIVER Value Portfolio", layout="wide")
 st.title("Value-Based Portfolio Optimizer (DRIVER Framework)")
 st.markdown("This dashboard implements the **Risk-Adjusted Preference Layer** and portfolio optimization pipeline.")
 
+st.info("**Disclaimer:** This tool is for educational and informational purposes only. It does not constitute financial advice, investment recommendations, or professional guidance of any kind. The analyses generated are AI-simulated perspectives and should not be used as the basis for any investment decisions. Always consult a qualified financial advisor before making investment decisions. Use at your own risk.")
+
 # --- INITIALIZE SESSION STATE ---
 if "global_alpha" not in st.session_state:
     st.session_state.global_alpha = 0.5
