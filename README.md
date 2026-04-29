@@ -1,14 +1,45 @@
-# FAskills
-
-Claude Code plugins for financial analysis.
+# DRIVER Framework: Value-Based Portfolio Optimizer
 
 > **Disclaimer:** This tool is for educational and informational purposes only. It does not constitute financial advice, investment recommendations, or professional guidance of any kind. The analyses generated are AI-simulated perspectives and should not be used as the basis for any investment decisions. Always consult a qualified financial advisor before making investment decisions. Use at your own risk.
 
-## Plugins
+## Project Description
+The **DRIVER Framework** is a fully interactive, end-to-end financial dashboard built in Python and Streamlit. It bridges the gap between fundamental value investing and modern portfolio theory. By automatically pulling live market data from Yahoo Finance, the application screens a universe of stocks using a Discounted Cash Flow (DCF) model, intercepts the results with a highly customizable Risk-Adjusted Preference Layer, and outputs mathematically optimal portfolio weights using SciPy's SLSQP optimizer.
 
-### financial-researcher (v2.0.0)
+## Project Goals
+1. **Automated DCF Valuation:** Eliminate manual modeling by dynamically calculating Free Cash Flow, WACC, and Intrinsic Value for any given stock.
+2. **Dynamic Risk-Adjustment:** Allow users to define their own risk philosophy by blending "Pure Valuation" (Margin of Safety) with "Pure Safety" (Volatility and Market Beta).
+3. **Advanced Portfolio Optimization:** Empower users to effortlessly shift between Maximizing the Sharpe Ratio or Minimizing Variance to generate actionable portfolio allocations.
+4. **Cross-Component Sensitivity:** Visually prove the butterfly effect of finance—demonstrating exactly how a minor shift in a macroeconomic assumption (like Terminal Growth) drastically alters the final optimal portfolio weights.
 
-### financial-researcher (v2.1.0)
+## Instructions / How to Run
+
+### 1. Installation
+Ensure you have Python installed. Clone the repository and install the required dependencies:
+```bash
+git clone https://github.com/ashleyccc/FAskills.git
+cd FAskills
+pip install -r requirements.txt
+```
+
+### 2. Launch the Application
+Start the Streamlit server to launch the interactive dashboard:
+```bash
+streamlit run app.py
+```
+This will open the application in your default web browser (typically at `http://localhost:8501`).
+
+### 3. Using the App
+- **Tab 1 (Portfolio Optimizer):** View the end-to-end pipeline, adjust global WACC/Growth assumptions, and analyze the Efficient Frontier.
+- **Tab 2 (Risk Adjustment Sandbox):** Experiment with custom tickers, isolate risk metrics (Volatility vs. Beta), visualize the Re-ranking effect, and click **"Apply to Main Pipeline"** to commit your strategy.
+- **Tab 3 (Deep Dive DCF Tool):** Run granular, individualized DCF sensitivity analyses on single tickers.
+
+---
+
+## Previous Plugins & Methodologies
+
+*The DRIVER Framework methodology artifacts can be found in `driver_define.md`, `driver_evolve.md`, and `driver_reflect.md`.*
+
+### financial-researcher (Legacy Plugin)
 
 8 legendary investors analyze any stock. One command.
 
@@ -19,7 +50,6 @@ Claude Code plugins for financial analysis.
 ```
 
 #### Investors
-
 | Investor | Focus |
 |----------|-------|
 | Warren Buffett | Moats, owner earnings, intrinsic value |
@@ -32,54 +62,24 @@ Claude Code plugins for financial analysis.
 | **Chief Risk Officer** | **Solvency, liquidity, Basel III stress tests** |
 
 #### Features
-
 - **Python Processing Layer** - Pre-calculates institutional-grade metrics:
-  - Piotroski F-Score (0-9 financial strength)
-  - Altman Z-Score (bankruptcy prediction)
-  - Beneish M-Score (earnings manipulation detection)
+  - Piotroski F-Score, Altman Z-Score, Beneish M-Score
   - **Credit Metrics**: ICR Stress Test, Refinancing Risk, Leverage Ratios
-  - Owner Earnings, EVA, DuPont analysis
-
 - **Output**
   - Signal consensus across all 8 analysts
   - Individual price targets and confidence levels
-  - Risk matrix and key concerns
-  - Full markdown report + JSON saved to `reports/`
 
-## Installation
-
-1. Clone this repo
-2. Configure MCP servers in `.mcp.json` with your API keys:
-   - `FINANCIAL_DATASETS_API_KEY` - [financialdatasets.ai](https://financialdatasets.ai)
-   - `TAVILY_API_KEY` - [tavily.com](https://tavily.com)
-
-3. Copy `.env.example` to `.env` and add your API keys
-
-## Structure
-
+### Structure
 ```
 FAskills/
-├── .claude-plugin/              # Marketplace config
-├── .mcp.json                    # MCP server definitions
-├── CLAUDE.md                    # Project instructions
-└── financial-researcher/        # The plugin
-    ├── .claude-plugin/          # Plugin config
-    ├── SKILL.md                 # Main skill orchestration
-    ├── experts/                 # 7 investor prompts
-    ├── processing/              # Python metrics (Piotroski, Altman, Beneish)
-    ├── references/              # DRIVER methodology
-    ├── reports/                 # Generated analyses
-    └── templates/               # Output schemas
-```
-
-## Testing
-
-Test the Python processing layer:
-```bash
-cd financial-researcher
-python -m processing.test_pipeline
+├── app.py                       # Main Streamlit Dashboard
+├── valuation_engine.py          # DCF Modeling Math
+├── risk_adjustment.py           # Ranking & Scaling Logic
+├── portfolio_optimizer.py       # SciPy SLSQP Optimization
+├── data_client.py               # Yahoo Finance Integration
+├── driver_*.md                  # DRIVER Methodology Artifacts
+└── financial-researcher/        # Legacy Claude Plugin
 ```
 
 ## License
-
 MIT
