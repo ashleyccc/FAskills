@@ -81,5 +81,10 @@ FAskills/
 └── financial-researcher/        # Legacy Claude Plugin
 ```
 
+## AI Usage Disclosure & Reflection
+This project was developed with the assistance of an advanced AI coding agent (Antigravity). The AI was utilized to scaffold the Streamlit architecture, implement the mathematical optimization algorithms (SciPy SLSQP), and debug environment issues (e.g., SSL certificate bypasses). 
+
+**Reflection:** Using an autonomous agent drastically accelerated the development timeline, allowing me to focus on the high-level financial architecture (e.g., designing the Risk Adjustment Sandbox and defining the Macro-Scenario Sensitivity Grid) rather than getting bogged down in Pandas syntax or Streamlit state management. However, it required strict oversight; I had to explicitly define financial guardrails (like preventing the Gordon Growth Model from breaking when Terminal Growth > WACC) to ensure the AI's code remained mathematically sound. This project demonstrated that AI is a powerful execution engine, but human domain expertise is still fundamentally required to guide the logic and validate the outputs.
+
 ## License
 MIT

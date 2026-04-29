@@ -28,6 +28,8 @@ min_margin = st.sidebar.slider("Min Margin of Safety (%)", min_value=-100, max_v
 global_wacc = st.sidebar.slider("Global WACC", min_value=0.05, max_value=0.20, value=0.10, step=0.01)
 global_stg = st.sidebar.slider("Global Short-Term Growth", min_value=0.0, max_value=0.50, value=0.05, step=0.01)
 global_tg = st.sidebar.slider("Global Terminal Growth", min_value=0.0, max_value=0.05, value=0.02, step=0.01)
+if global_tg > 0.03:
+    st.sidebar.warning("Warning: Terminal growth > 3% GDP. Assumption may be overly aggressive.")
 
 st.sidebar.subheader("2. Risk-Adjusted Layer")
 st.sidebar.info(f"**Current Alpha:** {st.session_state.global_alpha}\n\n**Metric:** {st.session_state.global_risk_metric}\n\n*(Edit in Tab 2)*")
@@ -106,8 +108,11 @@ display_df, current_weights, risk_adj_df, opt_res = run_pipeline(optimizer_objec
 
 if display_df.empty:
     st.warning("No stocks passed the initial DCF screen or data is missing.")
+elif "error" in opt_res:
+    st.error(opt_res["error"])
 else:
     st.subheader(f"Optimal Portfolio Performance ({optimizer_objective})")
+    st.caption("Note: Expected Return is a mathematical estimate based on historical covariance and is not a guaranteed value.")
     m1, m2, m3 = st.columns(3)
     m1.metric("Expected Return (Annual)", f"{opt_res.get('expected_return', 0)*100:.2f}%")
     m2.metric("Expected Risk (Volatility)", f"{opt_res.get('expected_volatility', 0)*100:.2f}%")
@@ -242,6 +247,7 @@ if not plot_df.empty:
 with tab2:
     st.header("Risk Adjustment Sandbox")
     st.markdown("Isolate the risk layer to experiment with different risk metrics and Alpha blends before committing them to the main pipeline.")
+    st.info("Note: The Risk-Adjusted Score represents **Safety**. A higher score means the stock is mathematically safer based on your metric choice.")
     
     col_input, col_controls = st.columns(2)
     
@@ -349,6 +355,9 @@ with tab3:
     user_growth = col_growth.slider("Short-Term Growth Rate", min_value=0.0, max_value=0.50, value=0.05, step=0.01)
     user_term = col_term.slider("Terminal Growth Rate", min_value=0.0, max_value=0.05, value=0.02, step=0.01)
     
+    if user_term > 0.03:
+        st.warning("Warning: Terminal growth exceeds standard long-run GDP growth (3%).")
+    
     if st.button("Run DCF Analysis"):
         with st.spinner(f"Fetching data for {ticker_input}..."):
             fin_data = fetch_financial_data(ticker_input.upper())
@@ -365,9 +374,15 @@ with tab3:
             )
             
             if dcf_res:
-                st.subheader(f"Valuation Outputs for {ticker_input.upper()}")
-                m1, m2, m3, m4 = st.columns(4)
-                m1.metric("Current Price", f"${fin_data['current_price']:.2f}")
+                if "error" in dcf_res:
+                    st.error(dcf_res["error"])
+                else:
+                    if "warning" in dcf_res:
+                        st.warning(dcf_res["warning"])
+                        
+                    st.subheader(f"Valuation Outputs for {ticker_input.upper()}")
+                    m1, m2, m3, m4 = st.columns(4)
+                    m1.metric("Current Price", f"${fin_data['current_price']:.2f}")
                 
                 margin_color = "normal" if dcf_res['margin_of_safety'] > 0 else "inverse"
                 m2.metric("Per-Share Intrinsic Value", f"${dcf_res['intrinsic_value']:.2f}", f"{dcf_res['margin_of_safety']*100:.1f}% Margin", delta_color=margin_color)

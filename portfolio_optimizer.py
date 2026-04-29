@@ -13,9 +13,8 @@ def optimize_portfolio(tickers: list, historical_prices: pd.DataFrame, max_weigh
     prices = historical_prices[tickers]
     returns = prices.pct_change().dropna()
     
-    if returns.empty:
-        w = {t: 1.0/len(tickers) for t in tickers}
-        return {"weights": w, "expected_return": 0.0, "expected_volatility": 0.0, "sharpe_ratio": 0.0}
+    if returns.empty or len(returns.columns) < 3:
+        return {"error": "Too few valid tickers (minimum 3 required) to perform a mathematically stable optimization.", "weights": {}, "expected_return": 0.0, "expected_volatility": 0.0, "sharpe_ratio": 0.0}
         
     mean_returns = returns.mean() * 252
     cov_matrix = returns.cov() * 252
@@ -65,6 +64,9 @@ def generate_efficient_frontier(tickers: list, historical_prices: pd.DataFrame, 
         
     prices = historical_prices[tickers]
     returns = prices.pct_change().dropna()
+    
+    if returns.empty or len(returns.columns) < 3:
+        return pd.DataFrame()
     mean_returns = returns.mean() * 252
     cov_matrix = returns.cov() * 252
     num_assets = len(tickers)

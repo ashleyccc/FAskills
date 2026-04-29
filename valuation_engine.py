@@ -5,7 +5,7 @@ def run_dcf(fcf, shares_outstanding, current_price, discount_rate=0.10, short_te
     Standard DCF calculation to compute intrinsic value and margin of safety.
     """
     if fcf is None or shares_outstanding is None or fcf <= 0 or shares_outstanding <= 0:
-        return None
+        return {"error": "Missing, zero, or negative Free Cash Flow / Shares Outstanding"}
         
     # Project future FCFs
     projected_fcfs = [fcf * (1 + short_term_growth)**i for i in range(1, years + 1)]
@@ -14,7 +14,7 @@ def run_dcf(fcf, shares_outstanding, current_price, discount_rate=0.10, short_te
     discounted_fcfs = [cf / ((1 + discount_rate)**i) for i, cf in enumerate(projected_fcfs, 1)]
     
     if discount_rate <= terminal_growth_rate:
-        return None
+        return {"error": f"Terminal Growth ({terminal_growth_rate*100:.1f}%) exceeds or equals WACC ({discount_rate*100:.1f}%). Model mathematically unstable."}
         
     # Terminal Value
     terminal_value = (projected_fcfs[-1] * (1 + terminal_growth_rate)) / (discount_rate - terminal_growth_rate)
@@ -32,12 +32,17 @@ def run_dcf(fcf, shares_outstanding, current_price, discount_rate=0.10, short_te
     else:
         margin_of_safety = None
         
-    return {
+    result = {
         "intrinsic_value": intrinsic_value_per_share,
         "margin_of_safety": margin_of_safety,
         "enterprise_value": enterprise_value,
         "equity_value": equity_value
     }
+    
+    if enterprise_value > 0 and (discounted_tv / enterprise_value) > 0.85:
+        result["warning"] = "Terminal Value dominates (>85% of EV). Valuation may be overly dependent on terminal assumptions."
+        
+    return result
 
 def generate_dcf_sensitivity(fcf, shares_outstanding, current_price, base_wacc, base_growth, terminal_growth):
     """
@@ -76,7 +81,7 @@ def screen_stocks(stock_data: dict, min_margin_of_safety: float, wacc: float = 0
             terminal_growth_rate=terminal_growth
         )
         
-        if dcf_result and dcf_result["margin_of_safety"] is not None:
+        if dcf_result and "error" not in dcf_result and dcf_result["margin_of_safety"] is not None:
             if dcf_result["margin_of_safety"] >= min_margin_of_safety:
                 results.append({
                     "Ticker": ticker,
