@@ -340,6 +340,9 @@ with tab2:
 
 with tab3:
     st.header("Individual Stock Deep Dive (DCF Tool)")
+    st.markdown("Satisfying Project 1 Requirements: Retrieve financials, calculate intrinsic value, adjust assumptions, and generate a sensitivity matrix.")
+    
+    ticker_input = st.text_input("Enter Stock Ticker", value="AAPL")
     
     col_wacc, col_growth, col_term = st.columns(3)
     user_wacc = col_wacc.slider("WACC (Discount Rate)", min_value=0.05, max_value=0.20, value=0.10, step=0.01)
